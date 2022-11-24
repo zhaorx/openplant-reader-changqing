@@ -1,0 +1,7 @@
+spring:
+  main:
+    web-application-type: none
+  data:
+    mongodb:
+      uri: mongodb://10.72.234.78:27017/gas
+interval: 60000
