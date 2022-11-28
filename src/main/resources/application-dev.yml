@@ -1,4 +1,8 @@
 spring:
   main:
     web-application-type: none
+magus:
+  address: 192.168.1.21:6644
+  user: admin
+  passwd: admin
 interval: 60000

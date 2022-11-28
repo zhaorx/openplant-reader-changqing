@@ -1,4 +1,4 @@
-package com.hy.http.model;
+package com.hy.openplant.model;
 
 import java.util.Date;
 

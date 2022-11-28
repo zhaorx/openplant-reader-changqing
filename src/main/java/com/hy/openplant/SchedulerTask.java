@@ -1,8 +1,8 @@
-package com.hy.http;
+package com.hy.openplant;
 
 
-import com.hy.http.model.Gas;
-import com.hy.http.model.Result;
+import com.hy.openplant.model.Gas;
+import com.hy.openplant.model.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -12,8 +12,15 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -82,24 +89,37 @@ public class SchedulerTask {
 
 
     public List<Gas> getRecentGas() {
-        String url = "http://localhost:6666/gas/list?ts_start={ts_start}&ts_end={ts_end}";
-        HttpHeaders requestHeaders = new HttpHeaders();
-        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
-        RestTemplate restTemplate = new RestTemplate();
+        List<Gas> list = new ArrayList<>();
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Calendar rightNow = Calendar.getInstance();
-        rightNow.setTime(new Date());
-        rightNow.add(Calendar.MONTH, -1);
-        Date dt1 = rightNow.getTime();
-        String ts_start = sdf.format(dt1);
-        Map<String, String> map = new HashMap();
-        map.put("ts_start", ts_start);
-        map.put("ts_end", sdf.format(new Date()));
+        try {
+            Connection conn = MagusConnector.connect();
+            String sql = "select * from realtime where GN='LHJ.SCADA.MES_ODR_8_3_2'";
+            Statement st = null;
+            st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql);
 
-        // 请求服务端添加玩家
-        Result result = restTemplate.getForObject(url, Result.class, map);
+            ResultSetMetaData md = rs.getMetaData();
 
-        return result.getList();
+            int columnCount = md.getColumnCount();
+
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            while (rs.next()) { //rowData = new HashMap(columnCount);
+                Gas item = new Gas();
+                for (int i = 1; i <= columnCount; i++) {
+                    item.setTs(sdf.parse(md.getColumnName(i)));
+                    item.setValue(Double.parseDouble(md.getColumnName(i)));
+
+                }
+                list.add(item);
+            }
+
+            rs.close();
+            st.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
     }
 }
