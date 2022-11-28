@@ -6,10 +6,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling // 开启定时
-public class MongoReaderApplication {
+public class HttpReaderApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MongoReaderApplication.class, args);
+        SpringApplication.run(HttpReaderApplication.class, args);
     }
 
 }

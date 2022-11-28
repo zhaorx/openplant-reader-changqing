@@ -5,9 +5,6 @@ import com.hy.mongo.model.Gas;
 import com.hy.mongo.model.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -15,18 +12,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 public class SchedulerTask {
-
-
-    @Resource
-    private MongoTemplate mongoTemplate;
-
     private static final Logger logger = LoggerFactory.getLogger(SchedulerTask.class);
 
     @Scheduled(fixedDelayString = "${interval}")
@@ -91,12 +82,24 @@ public class SchedulerTask {
 
 
     public List<Gas> getRecentGas() {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, -1);
+        String url = "http://localhost:6666/gas/list?ts_start={ts_start}&ts_end={ts_end}";
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+        RestTemplate restTemplate = new RestTemplate();
 
-        Query query = new Query(Criteria
-                .where("ts").gt(cal.getTime()));
-        List<Gas> list = mongoTemplate.find(query, Gas.class);
-        return list;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Calendar rightNow = Calendar.getInstance();
+        rightNow.setTime(new Date());
+        rightNow.add(Calendar.MONTH, -1);
+        Date dt1 = rightNow.getTime();
+        String ts_start = sdf.format(dt1);
+        Map<String, String> map = new HashMap();
+        map.put("ts_start", ts_start);
+        map.put("ts_end", sdf.format(new Date()));
+
+        // 请求服务端添加玩家
+        Result result = restTemplate.getForObject(url, Result.class, map);
+
+        return result.getList();
     }
 }
