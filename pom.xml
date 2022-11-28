@@ -11,8 +11,8 @@
     <groupId>com.hy</groupId>
     <artifactId>http-reader</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>mongo-reader</name>
-    <description>mongo-reader</description>
+    <name>http-reader</name>
+    <description>http-reader</description>
     <properties>
         <java.version>1.8</java.version>
     </properties>
