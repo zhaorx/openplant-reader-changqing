@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.hy</groupId>
-    <artifactId>mongo-reader</artifactId>
+    <artifactId>http-reader</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>mongo-reader</name>
     <description>mongo-reader</description>
