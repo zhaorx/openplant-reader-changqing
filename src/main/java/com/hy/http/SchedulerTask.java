@@ -1,8 +1,8 @@
-package com.hy.mongo;
+package com.hy.http;
 
 
-import com.hy.mongo.model.Gas;
-import com.hy.mongo.model.Result;
+import com.hy.http.model.Gas;
+import com.hy.http.model.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;

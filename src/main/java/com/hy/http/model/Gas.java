@@ -1,4 +1,4 @@
-package com.hy.mongo.model;
+package com.hy.http.model;
 
 import java.util.Date;
 
