@@ -6,3 +6,4 @@ magus:
   user: admin
   passwd: admin
 interval: 60000
+push-url: http://localhost:6666/gas/batch/add

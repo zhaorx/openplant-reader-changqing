@@ -5,6 +5,7 @@ import com.hy.openplant.model.Gas;
 import com.hy.openplant.model.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -26,6 +27,8 @@ import java.util.stream.Collectors;
 @Component
 public class SchedulerTask {
     private static final Logger logger = LoggerFactory.getLogger(SchedulerTask.class);
+    @Value("${push-url}")
+    private String pushUrl;
 
     @Scheduled(fixedDelayString = "${interval}")
     public void transferSchedule() {
@@ -64,7 +67,6 @@ public class SchedulerTask {
     }
 
     private Result batchAddTaos(List<Gas> list) {
-        String url = "http://localhost:6666/gas/batch/add";
         HttpHeaders requestHeaders = new HttpHeaders();
         requestHeaders.setContentType(MediaType.APPLICATION_JSON);
         RestTemplate restTemplate = new RestTemplate();
@@ -83,7 +85,7 @@ public class SchedulerTask {
         HttpEntity<Map<String, Object>> r = new HttpEntity<>(requestBody, requestHeaders);
 
         // 请求服务端添加玩家
-        Result result = restTemplate.postForObject(url, r, Result.class);
+        Result result = restTemplate.postForObject(pushUrl, r, Result.class);
         return result;
     }
 
