@@ -9,8 +9,8 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.hy</groupId>
-    <artifactId>openplant-reader</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <artifactId>openplant-reader-changqing</artifactId>
+    <version>0.1</version>
     <name>openplant-reader</name>
     <description>openplant-reader</description>
     <properties>
