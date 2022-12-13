@@ -2,8 +2,12 @@ spring:
   main:
     web-application-type: none
 magus:
-  address: 192.168.1.21:6644
+  host: 192.168.1.21
+  port: 6644
   user: admin
   passwd: admin
+  maxconn: 10
+  timeout: 10000
 interval: 60000
 push-url: http://localhost:6666/gas/batch/add
+points: ZTYXC190LNJQZ2_LN_TOTALALL,ZTYXC190LNJQZ1_PT9107

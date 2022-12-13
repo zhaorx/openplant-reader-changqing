@@ -3,6 +3,8 @@ package com.hy.openplant;
 
 import com.hy.openplant.model.Gas;
 import com.hy.openplant.model.Result;
+import com.magus.net.IOPConnect;
+import com.magus.net.OPDynamicData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,22 +15,28 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.Resource;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 public class SchedulerTask {
     private static final Logger logger = LoggerFactory.getLogger(SchedulerTask.class);
+
     @Value("${push-url}")
     private String pushUrl;
+    @Value("${points:}")
+    private String[] points;
+
+    @Resource
+    MagusConnector connector;
 
     @Scheduled(fixedDelayString = "${interval}")
     public void transferSchedule() {
@@ -36,8 +44,38 @@ public class SchedulerTask {
         List<Gas> list = this.getRecentGas();
         Result result = this.batchAddTaos(list);
         logger.info(result.getMessage());
-//        Result result = this.addTaos(list.get(0));
-//        System.out.println(result.getMessage());
+    }
+
+    public List<Gas> getRecentGas() {
+        List<Gas> list = new ArrayList<>();
+
+//        String[] pointNames = new String[] { POINT_AX_GLOBAL_NAME, POINT_DX_GLOBAL_NAME };
+
+        // 取实时
+        IOPConnect conn = connector.getConnect();
+        Map<String, OPDynamicData> result = null;
+        try {
+            result = conn.getPointDynamicDatas(points);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // 输出获取到的数据
+        Date now = new Date();
+        for (String key : result.keySet()) {
+            Gas item = new Gas();
+            OPDynamicData dynData = result.get(key);
+
+            item.setTs(now);
+            item.setValue(dynData.getAV());
+
+            list.add(item);
+        }
+
+        logger.info("operate success!");
+        connector.freeConnect(conn);
+
+        return list;
     }
 
     private Result addTaos(Gas data) {
@@ -90,38 +128,4 @@ public class SchedulerTask {
     }
 
 
-    public List<Gas> getRecentGas() {
-        List<Gas> list = new ArrayList<>();
-
-        try {
-            Connection conn = MagusConnector.connect();
-            String sql = "select * from realtime where GN='LHJ.SCADA.MES_ODR_8_3_2'";
-            Statement st = null;
-            st = conn.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-
-            ResultSetMetaData md = rs.getMetaData();
-
-            int columnCount = md.getColumnCount();
-
-
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            while (rs.next()) { //rowData = new HashMap(columnCount);
-                Gas item = new Gas();
-                for (int i = 1; i <= columnCount; i++) {
-                    item.setTs(sdf.parse(md.getColumnName(i)));
-                    item.setValue(Double.parseDouble(md.getColumnName(i)));
-
-                }
-                list.add(item);
-            }
-
-            rs.close();
-            st.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return list;
-    }
 }

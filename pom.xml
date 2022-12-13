@@ -34,6 +34,16 @@
             <version>2.0.19</version>
         </dependency>
 
+        <!-- 引入本地lib包 magus-->
+        <dependency>
+            <groupId>com.magus</groupId>
+            <artifactId>op.net</artifactId>
+            <scope>system</scope>
+            <version>1.0</version>
+<!--            <systemPath>${project.basedir}/src/main/resources/op.net.jar</systemPath>-->
+            <systemPath>${project.basedir}/src/lib/op.net.jar</systemPath>
+        </dependency>
+
 
     </dependencies>
 
@@ -42,6 +52,10 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- maven打包时会将外部引入的jar包（比如在根目录下或resource文件下新加外部jar包）打包到项目jar -->
+                    <includeSystemScope>true</includeSystemScope>
+                </configuration>
             </plugin>
         </plugins>
     </build>
