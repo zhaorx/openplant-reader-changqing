@@ -3,18 +3,18 @@ package com.hy.openplant.model;
 import java.util.Date;
 
 public class Gas {
-    private Date ts;
+    private String ts;
     private String point ;
     private String pname ;
     private String unit ;
     private String region ;
     private double value ;
 
-    public Date getTs() {
+    public String getTs() {
         return ts;
     }
 
-    public void setTs(Date ts) {
+    public void setTs(String ts) {
         this.ts = ts;
     }
 
@@ -56,5 +56,17 @@ public class Gas {
 
     public void setValue(double value) {
         this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return "Gas{" +
+                "ts='" + ts + '\'' +
+                ", point='" + point + '\'' +
+                ", pname='" + pname + '\'' +
+                ", unit='" + unit + '\'' +
+                ", region='" + region + '\'' +
+                ", value=" + value +
+                '}';
     }
 }

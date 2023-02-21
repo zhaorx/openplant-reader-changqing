@@ -51,16 +51,18 @@ public class MagusConnector {
             logger.info("get connect success!");
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (conn != null) {
-                conns.freeConnect(conn);
-            }
         }
+//        finally {
+//            if (conn != null) {
+//                conns.freeConnect(conn);
+//            }
+//        }
 
         return conn;
     }
 
     public void freeConnect(IOPConnect conn) {
+        logger.debug("@@@@@freeConnect" + conn);
         conns.freeConnect(conn);
     }
 

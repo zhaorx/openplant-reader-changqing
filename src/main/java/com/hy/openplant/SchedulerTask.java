@@ -32,18 +32,29 @@ public class SchedulerTask {
 
     @Value("${push-url}")
     private String pushUrl;
+    @Value("${push-multi-url}")
+    private String pushMultiUrl;
     @Value("${points:}")
     private String[] points;
+    @Value("${region}")
+    private String region;
+    private String sep = "_";
 
     @Resource
     MagusConnector connector;
+
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Scheduled(fixedDelayString = "${interval}")
     public void transferSchedule() {
         logger.info("starting transfer...");
         List<Gas> list = this.getRecentGas();
-        Result result = this.batchAddTaos(list);
-        logger.info(result.getMessage());
+        if (list.size() > 0) {
+            Result result = this.addMultiTaos(list);
+            logger.info(result.getMessage());
+        } else {
+            logger.info("getRecentGas no data");
+        }
     }
 
     public List<Gas> getRecentGas() {
@@ -61,15 +72,22 @@ public class SchedulerTask {
         }
 
         // 输出获取到的数据
-        Date now = new Date();
+        String dateStr = sdf.format(new Date());
         for (String key : result.keySet()) {
-            Gas item = new Gas();
             OPDynamicData dynData = result.get(key);
 
-            item.setTs(now);
-            item.setValue(dynData.getAV());
+            Gas g = new Gas();
+            g.setTs(dateStr);
+            g.setRegion(region);
+            // !taos表名不允许有'.' 所以替换成'_'
+            String _key = key.replaceAll("\\.", "_");
+            g.setPoint(region + sep + _key);
+            g.setValue(dynData.getAV());
 
-            list.add(item);
+            list.add(g);
+
+            logger.debug("######get_data1:" + dynData);
+            logger.debug("######get_data:" + g.toString());
         }
 
         logger.info("operate success!");
@@ -78,8 +96,20 @@ public class SchedulerTask {
         return list;
     }
 
+    public Result addMultiTaos(List<Gas> list) {
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+        RestTemplate restTemplate = new RestTemplate();
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("gasList", list);
+
+        HttpEntity<Map<String, Object>> r = new HttpEntity<>(requestBody, requestHeaders);
+        Result result = restTemplate.postForObject(pushMultiUrl, r, Result.class);
+
+        return result;
+    }
+
     private Result addTaos(Gas data) {
-        String url = "http://localhost:6666/gas/add";
         HttpHeaders requestHeaders = new HttpHeaders();
         requestHeaders.setContentType(MediaType.APPLICATION_JSON);
         RestTemplate restTemplate = new RestTemplate();
@@ -98,34 +128,10 @@ public class SchedulerTask {
         HttpEntity<Map<String, Object>> r = new HttpEntity<>(requestBody, requestHeaders);
 
         // 请求服务端添加玩家
-        Result result = restTemplate.postForObject(url, r, Result.class);
-
-        return result;
-
-    }
-
-    private Result batchAddTaos(List<Gas> list) {
-        HttpHeaders requestHeaders = new HttpHeaders();
-        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
-        RestTemplate restTemplate = new RestTemplate();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-        List<String> tsList = list.stream().map(item -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(item.getTs())).collect(Collectors.toList());
-        List<Double> valueList = list.stream().map(Gas::getValue).collect(Collectors.toList());
-
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("tss", tsList);
-        requestBody.put("values", valueList);
-        requestBody.put("point", list.get(0).getPoint());
-        requestBody.put("pname", list.get(0).getPname());
-        requestBody.put("unit", list.get(0).getUnit());
-        requestBody.put("region", list.get(0).getRegion());
-        HttpEntity<Map<String, Object>> r = new HttpEntity<>(requestBody, requestHeaders);
-
-        // 请求服务端添加玩家
         Result result = restTemplate.postForObject(pushUrl, r, Result.class);
-        return result;
-    }
 
+        return result;
+
+    }
 
 }

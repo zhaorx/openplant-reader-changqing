@@ -2,12 +2,14 @@ spring:
   main:
     web-application-type: none
 magus:
-  host: 192.168.1.21
-  port: 6644
-  user: admin
-  passwd: admin
+  host: 10.78.3.103
+  port: 8200
+  user: CQYTZNYYZX
+  passwd: CQYTmagus_221028
   maxconn: 10
   timeout: 10000
-points: point1,point2
+points: W3.CQTRQ.JH_PT_1301_2,W3.CQTRQ.YL_FU_1301,W3.CQTRQ.XYJPI510,W3.CQTRQ.YIJFU315,W3.CQTRQ.SH224_PI_SSYL,W3.CQTRQ.SH224_FU_SSLL,W3.CQTRQ.YU37_PI_SSYL,W3.CQTRQ.YU37_FU_SSLL,W3.CQTRQ.SD3961_PI_SSYL,W3.CQTRQ.SD3961_FU_SSLL
 interval: 60000
-push-url: http://localhost:6666/gas/batch/add
+push-url: http://localhost:6666/gas/add
+push-multi-url: http://localhost:6666/gas/multi/add
+region: changqing
